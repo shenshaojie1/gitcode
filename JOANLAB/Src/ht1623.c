@@ -101,11 +101,11 @@ void write_address(unsigned char Abyte)
 	unsigned char i = 0;
 	Abyte = Abyte << 1;
 
-	for (i = 0; i < 7; i++)
+	for (i = 0; i < 6; i++)
 	{
 		Clr_1625_Wr;
 		//Delay_us(10);
-		if ((Abyte >> (7 - i)) & 0x01)
+		if ((Abyte >> (6 - i)) & 0x01)
 		{
 			Set_1625_Dat;
 		}
@@ -217,7 +217,7 @@ void lcd_clr(void)
 */
 void lcd_all(void)
 {
-	write_addr_dat_n(0x0, 0xFF,50);
+	write_addr_dat_n(0x0, 0xFF,60);
 }
 
 void write_addr_dat_n(unsigned char _addr, unsigned char _dat, unsigned char n)
