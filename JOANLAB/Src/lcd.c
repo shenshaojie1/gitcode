@@ -1,0 +1,1062 @@
+#include "lcd.h"
+
+
+void write_addr_dat_n(unsigned char _addr, unsigned char _dat, unsigned char n);
+void LCD_Write_Speed_L1(uint16_t Speed_L1,uint16_t Speed_L3);
+void LCD_Write_Speed_L2(uint16_t Speed_L2,uint16_t Speed_L4);
+void LCD_rel(uint16_t rpm);
+extern uint16_t System_Stutas;
+extern  uint16_t L1_Speed;
+extern  uint16_t L3_Speed;
+extern  uint16_t L2_Speed;
+extern  uint16_t L4_Speed;
+extern  uint16_t M1_Speed;
+extern  uint16_t M2_Time;
+extern  uint16_t R1_Speed;
+extern  uint16_t time_1,time_2,time_3,time_4,time_set_1,time_set_2,time_set_3,time_set_4;
+extern  int Set_Flag;
+extern  int Dis_Flag;
+extern  uint8_t Set_Mode;
+extern  uint16_t half_sec;
+extern uint8_t Time_Stutas;
+void LCD_Light(short LCD_Status)
+{
+	switch(LCD_Status )
+	{
+		case 0 :
+		HAL_GPIO_WritePin(GPIOC, LCD_Pin, GPIO_PIN_RESET);
+		break ;
+		case 1 :
+		HAL_GPIO_WritePin(GPIOC, LCD_Pin, GPIO_PIN_SET);
+		break ;
+		
+	}
+		
+	
+}
+/****写最左边的设定速度***/
+void LCD_Write_Speed_L1(uint16_t Speed_L1,uint16_t Speed_L3)
+{
+	
+	uint8_t seg21,seg22,seg23,seg24,seg25,seg26,seg27,seg28,seg29,seg30;
+	seg21=0;seg22=0;seg23=0;seg24=0;seg25=0;seg26=0;seg27=0;seg28=0;seg29=0;seg30=0;
+	
+	
+
+		
+	//L1千位
+	if(Speed_L1 >999)
+	{
+	  seg21|=0x20;
+		seg21&=0x7f;
+	}
+	else
+  seg21|=0x30;
+	
+
+	//L1百位
+	if(Speed_L1 >99)
+	{
+		uint8_t b;
+		b=Speed_L1/100;
+		if(Speed_L1 >999)
+		b=b%10;
+		switch(b)
+		{
+			case 0: seg23&=0xef;seg22|=0x30;seg23|=0x20;seg24|=0x30;seg25|=0x20;
+			break ;
+			case 1: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg24|=0x20;seg25|=0x20;
+			break ;
+			case 2: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x10;seg23|=0x30;seg24|=0x30;
+			break ;
+			case 3: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg23|=0x30;seg24|=0x30;seg25|=0x20;
+			break ;	
+			case 4: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x20;seg23|=0x10;seg24|=0x20;seg25|=0x20;
+			break ;	
+			case 5: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x20;seg23|=0x30;seg24|=0x10;seg25|=0x20;
+			break ;	
+			case 6: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x30;seg23|=0x30;seg24|=0x10;seg25|=0x20;
+			break ;	
+			case 7: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x00;seg23|=0x20;seg24|=0x20;seg25|=0x20;
+			break ;	
+			case 8: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x30;seg23|=0x30;seg24|=0x30;seg25|=0x20;
+			break ;	
+			case 9: seg22&=0xCf;seg23&=0xCf;seg24&=0xCf;seg25&=0xCf;seg22|=0x20;seg23|=0x30;seg24|=0x30;seg25|=0x20;
+			break ;
+			default:
+			break;
+		}			
+	}
+	else
+	{
+		seg23&=0xef;seg22|=0x30;seg23|=0x20;seg24|=0x30;seg25|=0x20;
+	}
+		
+	//L1十位
+	if(Speed_L1 >9)
+	{
+		uint8_t s;
+		s=Speed_L1/10;
+		if(Speed_L1>99)
+		s=s%10;
+ 		switch(s)
+		{
+			case 0: seg27&=0xef;seg26|=0x30;seg27|=0x20;seg28|=0x30;seg29|=0x10;
+			break ;
+			case 1: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg28|=0x20;seg29|=0x10;
+			break ;
+			case 2: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x10;seg27|=0x30;seg28|=0x30;
+			break ;
+			case 3: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg27|=0x30;seg28|=0x30;seg29|=0x10;
+			break ;	
+			case 4: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x20;seg27|=0x10;seg28|=0x20;seg29|=0x10;
+			break ;	
+			case 5: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x20;seg27|=0x30;seg28|=0x10;seg29|=0x10;
+			break ;	
+			case 6: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x30;seg27|=0x30;seg28|=0x10;seg29|=0x10;
+			break ;	
+			case 7: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x00;seg27|=0x20;seg28|=0x20;seg29|=0x10;
+			break ;	
+			case 8: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x30;seg27|=0x30;seg28|=0x30;seg29|=0x10;
+			break ;	
+			case 9: seg26&=0xCf;seg27&=0xCf;seg28&=0xCf;seg29&=0xCf;seg26|=0x20;seg27|=0x30;seg28|=0x30;seg29|=0x10;
+			break ;
+			default:
+			break;
+		}	
+	}
+	else
+	{
+		seg27&=0xef;seg26|=0x30;seg27|=0x20;seg28|=0x30;seg29|=0x10;
+		
+	}
+
+		uint8_t g;
+		g=Speed_L1%10;
+		if(g>4)
+		{
+			seg29&=0xdf;seg30&=0xcf;seg29|=0x20;seg30|=0x20;
+		}
+		else
+		{
+			seg29&=0xdf;seg30&=0xcf;seg29|=0x00;seg30|=0x30;
+		}
+	
+	
+	
+	
+	
+
+	
+	//L3千位
+	if(Speed_L3 >999)
+	{
+			seg21|=0x08;
+			seg21&=0xfb;
+	}
+	else
+  seg21|=0x0c;
+	
+	//L3百位
+	if(Speed_L3 >99)
+	{
+		uint8_t b;
+		b=Speed_L3/100;
+		if(Speed_L3 >999)
+		b=b%10;
+		switch(b)
+		{
+			case 0: seg23&=0xfb;seg22|=0x0c;seg23|=0x08;seg24|=0x0c;seg25|=0x08;
+			break ;
+ 			case 1: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg24|=0x08;seg25|=0x08;
+			break ;
+			case 2: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x04;seg23|=0x0c;seg24|=0x0c;
+			break ;
+			case 3: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg23|=0x0c;seg24|=0x0c;seg25|=0x08;
+			break ;	
+			case 4: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x08;seg23|=0x04;seg24|=0x08;seg25|=0x08;
+			break ;	
+			case 5: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x08;seg23|=0x0c;seg24|=0x04;seg25|=0x08;
+			break ;	
+			case 6: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x0c;seg23|=0x0c;seg24|=0x04;seg25|=0x08;
+			break ;	
+			case 7: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x00;seg23|=0x08;seg24|=0x08;seg25|=0x08;
+			break ;	
+			case 8: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x0c;seg23|=0x0c;seg24|=0x0c;seg25|=0x08;
+			break ;	
+			case 9: seg22&=0xf3;seg23&=0xf3;seg24&=0xf3;seg25&=0xf3;seg22|=0x08;seg23|=0x0c;seg24|=0x0c;seg25|=0x08;
+			break ;
+			default:
+			break;
+		}			
+	}
+	else
+	{
+		seg23&=0xfb;seg22|=0x0c;seg23|=0x08;seg24|=0x0c;seg25|=0x08;
+	}
+		
+	//L1十位
+	if(Speed_L3 >9)
+	{
+		uint8_t s;
+		s=Speed_L3/10;
+		if(Speed_L3>99)
+		s=s%10;
+ 		switch(s)
+		{
+			case 0: seg27&=0xfb;seg26|=0x0c;seg27|=0x08;seg28|=0x0c;seg29|=0x04;
+			break ;
+ 			case 1: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg28|=0x08;seg29|=0x04;
+			break ;
+			case 2: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x04;seg27|=0x0c;seg28|=0x0c;
+			break ;
+			case 3: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg27|=0x0c;seg28|=0x0c;seg29|=0x04;
+			break ;	
+			case 4: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x08;seg27|=0x04;seg28|=0x08;seg29|=0x04;
+			break ;	
+			case 5: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x08;seg27|=0x0c;seg28|=0x04;seg29|=0x04;
+			break ;	
+			case 6: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x0c;seg27|=0x0c;seg28|=0x04;seg29|=0x04;
+			break ;	
+			case 7: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x00;seg27|=0x08;seg28|=0x08;seg29|=0x04;
+			break ;	
+			case 8: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x0c;seg27|=0x0c;seg28|=0x0c;seg29|=0x04;
+			break ;	
+			case 9: seg26&=0xf3;seg27&=0xf3;seg28&=0xf3;seg29&=0xf3;seg26|=0x08;seg27|=0x0c;seg28|=0x0c;seg29|=0x04;
+			break ;
+			default:
+			break;
+		}	
+	}
+	else
+	{
+		seg27&=0xfb;seg26|=0x0c;seg27|=0x08;seg28|=0x0c;seg29|=0x04;
+		
+	}
+
+	
+		uint8_t e;
+		e=Speed_L3%10;
+		if(e>4)
+		{
+			seg29&=0xf7;seg30&=0xf3;seg29|=0x08;seg30|=0x08;
+		}
+		else
+		{
+			seg29&=0xf7;seg30&=0xf3;seg29|=0x00;seg30|=0x0c;
+		}
+	
+	
+	
+		
+	switch(Dis_Flag)
+	{
+		case 0: seg25&=0xeb;
+		break ;
+		case 1: seg25&=0xeb;seg25|=0x10;
+		break ;
+		case 3: seg25&=0xeb;seg25|=0x04;
+		break ;
+	}
+	
+	write_addr_dat_n(40, seg21,1);
+	write_addr_dat_n(42, seg22,1);
+	write_addr_dat_n(44, seg23,1);
+	write_addr_dat_n(46, seg24,1);
+	write_addr_dat_n(48, seg25,1);
+	write_addr_dat_n(50, seg26,1);
+	write_addr_dat_n(52, seg27,1);
+	write_addr_dat_n(54, seg28,1);
+	write_addr_dat_n(56, seg29,1);
+	write_addr_dat_n(58, seg30,1);
+	
+}
+
+
+void LCD_Write_Speed_L2(uint16_t Speed_L2,uint16_t Speed_L4)
+{
+	
+	uint8_t seg1,seg2,seg3,seg4,seg5,seg6,seg7,seg8,seg9,seg10;
+	seg1=0;seg2=0;seg3=0;seg4=0;seg5=0;seg6=0;seg7=0;seg8=0;seg9=0;seg10=0;
+	
+	
+
+	
+	
+	//L2千位
+	if(Speed_L2 >999)
+	{
+	  seg1|=0x20;
+		seg2&=0x7f;
+	}
+	else
+  seg1|=0x30;
+	
+
+	//L2百位
+	if(Speed_L2 >99)
+	{
+		uint8_t b;
+		b=Speed_L2/100;
+		if(Speed_L2 >999)
+		b=b%10;
+		switch(b)
+		{
+			case 0: seg3&=0xef;seg2|=0x30;seg3|=0x20;seg4|=0x30;seg5|=0x20;
+			break ;
+			case 1: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg4|=0x20;seg5|=0x20;
+			break ;
+			case 2: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x10;seg3|=0x30;seg4|=0x30;
+			break ;
+			case 3: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg3|=0x30;seg4|=0x30;seg5|=0x20;
+			break ;	
+			case 4: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x20;seg3|=0x10;seg4|=0x20;seg5|=0x20;
+			break ;	
+			case 5: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x20;seg3|=0x30;seg4|=0x10;seg5|=0x20;
+			break ;	
+			case 6: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x30;seg3|=0x30;seg4|=0x10;seg5|=0x20;
+			break ;	
+			case 7: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x00;seg3|=0x20;seg4|=0x20;seg5|=0x20;
+			break ;	
+			case 8: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x30;seg3|=0x30;seg4|=0x30;seg5|=0x20;
+			break ;	
+			case 9: seg2&=0xCf;seg3&=0xCf;seg4&=0xCf;seg5&=0xCf;seg2|=0x20;seg3|=0x30;seg4|=0x30;seg5|=0x20;
+			break ;
+			default:
+			break;
+		}			
+	}
+	else
+	{
+		seg3&=0xef;seg2|=0x30;seg3|=0x20;seg4|=0x30;seg5|=0x20;
+	}
+		
+	//L2十位
+	if(Speed_L2 >9)
+	{
+		uint8_t s;
+		s=Speed_L2/10;
+		if(Speed_L2>99)
+		s=s%10;
+ 		switch(s)
+		{
+			case 0: seg7&=0xef;seg6|=0x30;seg7|=0x20;seg8|=0x30;seg9|=0x10;
+			break ;
+			case 1: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg8|=0x20;seg9|=0x10;
+			break ;
+			case 2: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x10;seg7|=0x30;seg8|=0x30;
+			break ;
+			case 3: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg7|=0x30;seg8|=0x30;seg9|=0x10;
+			break ;	
+			case 4: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x20;seg7|=0x10;seg8|=0x20;seg9|=0x10;
+			break ;	
+			case 5: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x20;seg7|=0x30;seg8|=0x10;seg9|=0x10;
+			break ;	
+			case 6: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x30;seg7|=0x30;seg8|=0x10;seg9|=0x10;
+			break ;	
+			case 7: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x00;seg7|=0x20;seg8|=0x20;seg9|=0x10;
+			break ;	
+			case 8: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x30;seg7|=0x30;seg8|=0x30;seg9|=0x10;
+			break ;	
+			case 9: seg6&=0xCf;seg7&=0xCf;seg8&=0xCf;seg9&=0xCf;seg6|=0x20;seg7|=0x30;seg8|=0x30;seg9|=0x10;
+			break ;
+			default:
+			break;
+		}	
+	}
+	else
+	{
+		seg7&=0xef;seg6|=0x30;seg7|=0x20;seg8|=0x30;seg9|=0x10;
+		
+	}
+
+		uint8_t g;
+		g=Speed_L2%10;
+		if(g>4)
+		{
+			seg9&=0xdf;seg10&=0xcf;seg9|=0x20;seg10|=0x20;
+		}
+		else
+		{
+			seg9&=0xdf;seg10&=0xcf;seg9|=0x00;seg10|=0x30;
+		}
+	
+	
+	
+	
+	
+
+	
+	//L4千位
+	if(Speed_L4 >999)
+	{
+			seg1|=0x08;
+			seg1&=0xfb;
+	}
+	else
+  seg1|=0x0c;
+	
+	//L4百位
+	if(Speed_L4 >99)
+	{
+		uint8_t b;
+		b=Speed_L4/100;
+		if(Speed_L4 >999)
+		b=b%10;
+		switch(b)
+		{
+			case 0: seg3&=0xfb;seg2|=0x0c;seg3|=0x08;seg4|=0x0c;seg5|=0x08;
+			break ;
+ 			case 1: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg4|=0x08;seg5|=0x08;
+			break ;
+			case 2: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x04;seg3|=0x0c;seg4|=0x0c;
+			break ;
+			case 3: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg3|=0x0c;seg4|=0x0c;seg5|=0x08;
+			break ;	
+			case 4: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x08;seg3|=0x04;seg4|=0x08;seg5|=0x08;
+			break ;	
+			case 5: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x08;seg3|=0x0c;seg4|=0x04;seg5|=0x08;
+			break ;	
+			case 6: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x0c;seg3|=0x0c;seg4|=0x04;seg5|=0x08;
+			break ;	
+			case 7: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x00;seg3|=0x08;seg4|=0x08;seg5|=0x08;
+			break ;	
+			case 8: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x0c;seg3|=0x0c;seg4|=0x0c;seg5|=0x08;
+			break ;	
+			case 9: seg2&=0xf3;seg3&=0xf3;seg4&=0xf3;seg5&=0xf3;seg2|=0x08;seg3|=0x0c;seg4|=0x0c;seg5|=0x08;
+			break ;
+			default:
+			break;
+		}			
+	}
+	else
+	{
+		seg3&=0xfb;seg2|=0x0c;seg3|=0x08;seg4|=0x0c;seg5|=0x08;
+	}
+		
+	//L4十位
+	if(Speed_L4 >9)
+	{
+		uint8_t s;
+		s=Speed_L4/10;
+		if(Speed_L4>99)
+		s=s%10;
+ 		switch(s)
+		{
+			case 0: seg7&=0xfb;seg6|=0x0c;seg7|=0x08;seg8|=0x0c;seg9|=0x04;
+			break ;
+ 			case 1: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg8|=0x08;seg9|=0x04;
+			break ;
+			case 2: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x04;seg7|=0x0c;seg8|=0x0c;
+			break ;
+			case 3: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg7|=0x0c;seg8|=0x0c;seg9|=0x04;
+			break ;	
+			case 4: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x08;seg7|=0x04;seg8|=0x08;seg9|=0x04;
+			break ;	
+			case 5: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x08;seg7|=0x0c;seg8|=0x04;seg9|=0x04;
+			break ;	
+			case 6: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x0c;seg7|=0x0c;seg8|=0x04;seg9|=0x04;
+			break ;	
+			case 7: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x00;seg7|=0x08;seg8|=0x08;seg9|=0x04;
+			break ;	
+			case 8: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x0c;seg7|=0x0c;seg8|=0x0c;seg9|=0x04;
+			break ;	
+			case 9: seg6&=0xf3;seg7&=0xf3;seg8&=0xf3;seg9&=0xf3;seg6|=0x08;seg7|=0x0c;seg8|=0x0c;seg9|=0x04;
+			break ;
+			default:
+			break;
+		}	
+	}
+	else
+	{
+		seg7&=0xfb;seg6|=0x0c;seg7|=0x08;seg8|=0x0c;seg9|=0x04;
+		
+	}
+
+		uint8_t e;
+		e=Speed_L4%10;
+		if(e>4)
+		{
+			seg9&=0xf7;seg10&=0xf3;seg9|=0x08;seg10|=0x08;
+		}
+		else
+		{
+			seg9&=0xf7;seg10&=0xf3;seg9|=0x00;seg10|=0x0c;
+		}
+	
+		switch(Dis_Flag)
+	{
+		case 0: seg5&=0xeb;
+		break ;
+		case 2: seg5&=0xeb;seg5|=0x10;
+		break ;
+		case 4: seg5&=0xeb;seg5|=0x04;
+		break ;
+		default:
+		break;
+	}
+	write_addr_dat_n(0, seg1,1);
+	write_addr_dat_n(2, seg2,1);
+	write_addr_dat_n(4, seg3,1);
+	write_addr_dat_n(6, seg4,1);
+	write_addr_dat_n(8, seg5,1);
+	write_addr_dat_n(10, seg6,1);
+	write_addr_dat_n(12, seg7,1);
+	write_addr_dat_n(14, seg8,1);
+	write_addr_dat_n(16, seg9,1);
+	write_addr_dat_n(18, seg10,1);
+	
+}
+
+
+/****右边设定显示***/
+
+void LCD_rel(uint16_t rpm)
+{
+	uint8_t seg31,seg32,seg33,seg34,seg35,seg36,seg37,seg38,seg39,seg40;
+	seg31=0;seg32=0;seg33=0;seg34=0;seg35=0;seg36=0;seg37=0;seg38=0;seg39=0;seg40=0;
+		//M1千位
+	if(rpm >999)
+	{
+	  seg33|=0x80;
+		seg32&=0x7f;
+	}
+	else
+	{
+		seg33|=0x80;
+		seg32|=0x80;
+	}
+	
+		//M1百位
+	if(rpm >99)
+	{
+		uint8_t b;
+		b=rpm/100;
+		if(rpm >999)
+		b=b%10;
+		switch(b)
+		{
+			case 0: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0xc0;seg35|=0xa0;seg36|=0xc0;
+			break ;
+			case 1: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x00;seg35|=0x00;seg36|=0xc0;
+			break ;
+			case 2: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x40;seg35|=0xe0;seg36|=0x80;
+			break ;
+			case 3: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x00;seg35|=0xe0;seg36|=0xc0;
+			break ;	
+			case 4: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x80;seg35|=0x40;seg36|=0xc0;
+			break ;	
+			case 5: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x80;seg35|=0xe0;seg36|=0x40;
+			break ;	
+			case 6: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0xc0;seg35|=0xe0;seg36|=0x40;
+			break ;	
+			case 7: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x00;seg35|=0x80;seg36|=0xc0;
+			break ;	
+			case 8: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0xc0;seg35|=0xe0;seg36|=0xc0;
+			break ;	
+			case 9: seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0x80;seg35|=0xe0;seg36|=0xc0;
+			break ;
+			default:
+			break;
+		}			
+	}
+	else
+	{
+		seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg34|=0xc0;seg35|=0xa0;seg36|=0xc0;
+	}
+	
+		//M1十位
+	if(rpm >9)
+	{
+		uint8_t s;
+		s=rpm/10;
+		if(rpm>99)
+		s=s%10;
+ 		switch(s)
+		{
+			case 0: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x60;seg38|=0xa0;seg39|=0xc0;
+			break ;
+ 			case 1: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x00;seg38|=0x00;seg39|=0xc0;
+			break ;
+			case 2: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x20;seg38|=0xe0;seg39|=0x80;
+			break ;
+			case 3: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x00;seg38|=0xe0;seg39|=0xc0;
+			break ;	
+			case 4: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x40;seg38|=0x40;seg39|=0xc0;
+			break ;	
+			case 5: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x40;seg38|=0xe0;seg39|=0x40;
+			break ;	
+			case 6: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x60;seg38|=0xe0;seg39|=0x40;
+			break ;	
+			case 7: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x00;seg38|=0x80;seg39|=0xc0;
+			break ;	
+			case 8: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x60;seg38|=0xe0;seg39|=0xc0;
+			break ;	
+			case 9: seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x40;seg38|=0xe0;seg39|=0xc0;
+			break ;
+			default:
+			break;
+		}	
+	}
+	else
+	{
+		seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg37|=0x60;seg38|=0xa0;seg39|=0xc0;
+		
+	}
+	
+
+		uint8_t g;
+		g=rpm%10;
+		if(g>4)
+		{
+			seg40&=0x3f;seg40|=0x80;
+		}
+		else
+		{
+			seg40&=0x3f;seg40|=0xc0;
+		}
+		
+//		if(Set_Mode==1)
+//		{
+//			if(half_sec%2)
+//			{
+//					seg32&=0x7f;seg33&=0x7f; seg34&=0x1f;seg35&=0x1f;seg36&=0x1f;seg37&=0x1f;seg38&=0x1f;seg39&=0x1f;seg40&=0x3f;	
+//			}		
+//		}
+		
+		
+		
+		
+		
+				//M2千位
+		switch(time_1%10)
+		{
+			case 0: seg32&=0xf0;seg33&=0xf0;seg32|=0x05;seg33|=0x0f;
+			break ;
+			case 1: seg32&=0xf0;seg33&=0xf0;seg32|=0x00;seg33|=0x06;
+			break ;
+			case 2: seg32&=0xf0;seg33&=0xf0;seg32|=0x03;seg33|=0x0d;
+			break ;
+			case 3: seg32&=0xf0;seg33&=0xf0;seg32|=0x02;seg33|=0x0f;
+			break ;	
+			case 4: seg32&=0xf0;seg33&=0xf0;seg32|=0x06;seg33|=0x06;
+			break ;	
+			case 5: seg32&=0xf0;seg33&=0xf0;seg32|=0x06;seg33|=0x0b;
+			break ;	
+			case 6: seg32&=0xf0;seg33&=0xf0;seg32|=0x07;seg33|=0x0b;
+			break ;	
+			case 7: seg32&=0xf0;seg33&=0xf0;seg32|=0x00;seg33|=0x0e;
+			break ;	
+			case 8: seg32&=0xf0;seg33&=0xf0;seg32|=0x07;seg33|=0x0f;
+			break ;	
+			case 9: seg32&=0xf0;seg33&=0xf0;seg32|=0x06;seg33|=0x0f;
+			break ;
+			default:
+			break;
+		}	
+
+				//M2百位
+		switch(time_2%10)
+		{
+			case 0: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x07;seg35|=0x05;seg36|=0x01;
+			break ;
+			case 1: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x00;seg35|=0x04;seg36|=0x01;
+			break ;
+			case 2: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x05;seg35|=0x07;seg36|=0x00;
+			break ;
+			case 3: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x04;seg35|=0x07;seg36|=0x01;
+			break ;	
+			case 4: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x02;seg35|=0x06;seg36|=0x01;
+			break ;	
+			case 5: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x06;seg35|=0x03;seg36|=0x01;
+			break ;	
+			case 6: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x07;seg35|=0x03;seg36|=0x01;
+			break ;	
+			case 7: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x04;seg35|=0x04;seg36|=0x01;
+			break ;	
+			case 8: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x07;seg35|=0x07;seg36|=0x01;
+			break ;	
+			case 9: seg34&=0xf8;seg35&=0xf8;seg36&=0xfe;seg34|=0x06;seg35|=0x07;seg36|=0x01;
+			break ;
+			default:
+			break;
+		}		
+     //M2十位
+		switch(time_3%10)
+		{
+			case 0: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x04;seg37|=0x05;seg38|=0x07;
+			break ;
+			case 1: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x00;seg37|=0x00;seg38|=0x06;
+			break ;
+			case 2: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x00;seg37|=0x07;seg38|=0x05;
+			break ;
+			case 3: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x00;seg37|=0x06;seg38|=0x07;
+			break ;	
+			case 4: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x04;seg37|=0x02;seg38|=0x06;
+			break ;	
+			case 5: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x04;seg37|=0x06;seg38|=0x03;
+			break ;	
+			case 6: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x04;seg37|=0x07;seg38|=0x03;
+			break ;	
+			case 7: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x00;seg37|=0x04;seg38|=0x06;
+			break ;	
+			case 8: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x04;seg37|=0x07;seg38|=0x07;
+			break ;	
+			case 9: seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg36|=0x04;seg37|=0x06;seg38|=0x07;
+			break ;
+			default:
+			break;
+		}		
+     //M2个位
+		switch(time_4%10)
+		{
+			case 0: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x07;seg40|=0x05;
+			break ;
+			case 1: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x00;seg40|=0x04;
+			break ;
+			case 2: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x00;seg39|=0x05;seg40|=0x07;
+			break ;
+			case 3: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x04;seg40|=0x07;
+			break ;	
+			case 4: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x02;seg40|=0x06;
+			break ;	
+			case 5: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x06;seg40|=0x03;
+			break ;	
+			case 6: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x07;seg40|=0x03;
+			break ;	
+			case 7: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x04;seg40|=0x04;
+			break ;	
+			case 8: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x07;seg40|=0x07;
+			break ;	
+			case 9: seg31&=0xfe;seg39&=0xf8;seg40&=0xf8;seg31|=0x01;seg39|=0x06;seg40|=0x07;
+			break ;
+			default:
+			break;
+		}			
+
+//    if(Set_Mode==2)
+//		{
+//			if(half_sec%2)
+//			{
+//				 seg31&=0xfe;seg39&=0xf8;seg40&=0xf8; seg36&=0xfb;seg37&=0xf8;seg38&=0xf8;seg34&=0xf8;seg35&=0xf8;seg36&=0xfe; seg32&=0xf0;seg33&=0xf0;
+//			}		
+//	 	}	
+
+	
+		  seg31|=0x62;
+	  	seg36|=0x02;
+				  if((System_Stutas==3)||(System_Stutas==4))
+			{
+				if(half_sec%2)
+					seg36&=0xfd;
+			}
+		
+	write_addr_dat_n(60, seg31,1);
+	write_addr_dat_n(62, seg32,1);
+	write_addr_dat_n(64, seg33,1);
+	write_addr_dat_n(66, seg34,1);
+	write_addr_dat_n(68, seg35,1);
+	write_addr_dat_n(70, seg36,1);
+	write_addr_dat_n(72, seg37,1);
+	write_addr_dat_n(74, seg38,1);
+	write_addr_dat_n(76, seg39,1);
+	write_addr_dat_n(78, seg40,1);
+}
+
+	
+void LCD_set(uint16_t set_r)
+{
+	uint8_t seg11,seg12,seg13,seg14,seg15,seg16,seg17,seg18,seg19,seg20;
+	seg11=0;seg12=0;seg13=0;seg14=0;seg15=0;seg16=0;seg17=0;seg18=0;seg19=0;seg20=0;
+	
+	
+	//R1千位
+	if(set_r >999)
+	{
+	  seg12|=0x80;
+		seg11&=0x7f;
+	}
+	else
+	{
+		seg11|=0x80;
+		seg12|=0x80;
+	}
+	
+		//R1百位
+	if(set_r >99)
+	{
+		uint8_t b;
+		b=set_r/100;
+		if(set_r >999)
+		b=b%10;
+		switch(b)
+		{
+			case 0: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0xc0;seg14|=0xa0;seg15|=0x60;
+			break ;
+			case 1: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x00;seg14|=0x00;seg15|=0x60;
+			break ;
+			case 2: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x40;seg14|=0xe0;seg15|=0x40;
+			break ;
+			case 3: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x00;seg14|=0xe0;seg15|=0x60;
+			break ;	
+			case 4: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x80;seg14|=0x40;seg15|=0x60;
+			break ;	
+			case 5: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x80;seg14|=0xe0;seg15|=0x20;
+			break ;	
+			case 6: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0xc0;seg14|=0xe0;seg15|=0x20;
+			break ;	
+			case 7: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x00;seg14|=0x80;seg15|=0x60;
+			break ;	
+			case 8: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0xc0;seg14|=0xe0;seg15|=0x60;
+			break ;	
+			case 9: seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0x80;seg14|=0xe0;seg15|=0x60;
+			break ;
+			default:
+			break;
+		}			
+	}
+	else
+	{
+		seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg13|=0xc0;seg14|=0xa0;seg15|=0x60;
+	}
+	
+		//R1十位
+	if(set_r >9)
+	{
+		uint8_t s;
+		s=set_r/10;
+		if(set_r>99)
+		s=s%10;
+ 		switch(s)
+		{
+			case 0: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0xc0;seg17|=0xa0;seg18|=0x60;
+			break ;
+ 			case 1: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x00;seg17|=0x00;seg18|=0x60;
+			break ;
+			case 2: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x40;seg17|=0xe0;seg18|=0x40;
+			break ;
+			case 3: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x00;seg17|=0xe0;seg18|=0x60;
+			break ;	
+			case 4: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x80;seg17|=0x40;seg18|=0x60;
+			break ;	
+			case 5: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x80;seg17|=0xe0;seg18|=0x20;
+			break ;	
+			case 6: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0xc0;seg17|=0xe0;seg18|=0x20;
+			break ;	
+			case 7: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x00;seg17|=0x80;seg18|=0x60;
+			break ;	
+			case 8: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0xc0;seg17|=0xe0;seg18|=0x60;
+			break ;	
+			case 9: seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0x80;seg17|=0xe0;seg18|=0x60;
+			break ;
+			default:
+			break;
+		}	
+	}
+	else
+	{
+		seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg16|=0xc0;seg17|=0xa0;seg18|=0x60;
+		
+	}
+	
+
+		uint8_t g;
+		g=set_r%10;
+		if(g>4)
+		{
+			seg20&=0xbf;seg19|=0x80;seg20|=0x80;
+		}
+		else
+		{
+			seg19&=0x7f;seg20|=0xc0;
+		}		
+		
+
+	
+
+		uint8_t d;
+		d=M1_Speed%10;
+	  if(d>4) 
+		{
+			seg15|=0x80;
+		}
+		else seg15&=0x7f;
+		
+		
+		if(Set_Mode==1)
+		{
+			if(half_sec%2)
+			{
+					seg19&=0x7f;//seg15&=0x7f;
+				 seg12&=0x7f;seg11&=0x7f;seg13&=0x3f;seg14&=0x1f;seg15&=0x9f;seg16&=0x3f;seg17&=0x1f;seg18&=0x1f;seg20&=0x3f;
+		
+			}
+				
+			
+			
+			
+		}
+		
+		
+
+	
+					//R2千位
+		switch(time_set_1)
+		{
+			case 0: seg11&=0xf0;seg12&=0xf0;seg11|=0x05;seg12|=0x0f;
+			break ;
+			case 1: seg11&=0xf0;seg12&=0xf0;seg11|=0x00;seg12|=0x06;
+			break ;
+			case 2: seg11&=0xf0;seg12&=0xf0;seg11|=0x03;seg12|=0x0d;
+			break ;
+			case 3: seg11&=0xf0;seg12&=0xf0;seg11|=0x02;seg12|=0x0f;
+			break ;	
+			case 4: seg11&=0xf0;seg12&=0xf0;seg11|=0x06;seg12|=0x06;
+			break ;	
+			case 5: seg11&=0xf0;seg12&=0xf0;seg11|=0x06;seg12|=0x0b;
+			break ;	
+			case 6: seg11&=0xf0;seg12&=0xf0;seg11|=0x07;seg12|=0x0b;
+			break ;	
+			case 7: seg11&=0xf0;seg12&=0xf0;seg11|=0x00;seg12|=0x0e;
+			break ;	
+			case 8: seg11&=0xf0;seg12&=0xf0;seg11|=0x07;seg12|=0x0f;
+			break ;	
+			case 9: seg11&=0xf0;seg12&=0xf0;seg11|=0x06;seg12|=0x0f;
+			break ;
+			default:
+			break;
+		}	
+	
+					//R2百位
+		switch(time_set_2)
+		{
+			case 0: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x07;seg14|=0x05;seg15|=0x01;
+			break ;
+			case 1: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x00;seg14|=0x04;seg15|=0x01;
+			break ;
+			case 2: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x05;seg14|=0x07;seg15|=0x00;
+			break ;
+			case 3: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x04;seg14|=0x07;seg15|=0x01;
+			break ;	
+			case 4: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x02;seg14|=0x06;seg15|=0x01;
+			break ;	
+			case 5: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x06;seg14|=0x03;seg15|=0x01;
+			break ;	
+			case 6: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x07;seg14|=0x03;seg15|=0x01;
+			break ;	
+			case 7: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x04;seg14|=0x04;seg15|=0x01;
+			break ;	
+			case 8: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x07;seg14|=0x07;seg15|=0x01;
+			break ;	
+			case 9: seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg13|=0x06;seg14|=0x07;seg15|=0x01;
+			break ;
+			default:
+			break;
+		}		
+		
+		 //R2十位
+		switch(time_set_3%10)
+		{
+			case 0: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x04;seg16|=0x05;seg17|=0x07;
+			break ;
+			case 1: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x00;seg16|=0x00;seg17|=0x06;
+			break ;
+			case 2: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x00;seg16|=0x07;seg17|=0x05;
+			break ;
+			case 3: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x00;seg16|=0x06;seg17|=0x07;
+			break ;	
+			case 4: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x04;seg16|=0x02;seg17|=0x06;
+			break ;	
+			case 5: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x04;seg16|=0x06;seg17|=0x03;
+			break ;	
+			case 6: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x04;seg16|=0x07;seg17|=0x03;
+			break ;	
+			case 7: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x00;seg16|=0x04;seg17|=0x06;
+			break ;	
+			case 8: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x04;seg16|=0x07;seg17|=0x07;
+			break ;	
+			case 9: seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;seg15|=0x04;seg16|=0x06;seg17|=0x07;
+			break ;
+			default:
+			break;
+		}		
+		
+		//R2个位
+		switch(time_set_4%10)
+		{
+			case 0: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x07;seg19|=0x05;
+			break ;
+			case 1: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x00;seg19|=0x04;
+			break ;
+			case 2: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x00;seg18|=0x05;seg19|=0x07;
+			break ;
+			case 3: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x04;seg19|=0x07;
+			break ;	
+			case 4: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x02;seg19|=0x06;
+			break ;	
+			case 5: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x06;seg19|=0x03;
+			break ;	
+			case 6: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x07;seg19|=0x03;
+			break ;	
+			case 7: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x04;seg19|=0x04;
+			break ;	
+			case 8: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x07;seg19|=0x07;
+			break ;	
+			case 9: seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg20|=0x01;seg18|=0x06;seg19|=0x07;
+			break ;
+			default:
+			break;
+		}	
+		
+		
+		if(Set_Mode==2)
+		{
+			if(half_sec%2)
+			{
+				seg20&=0xfe;seg18&=0xf8;seg19&=0xf8;seg15&=0xfb;seg16&=0xf8;seg17&=0xf8;
+			}		
+	 	}	
+		
+		if(Set_Mode==3)
+		{
+			if(half_sec%2)
+			{
+				seg13&=0xf8;seg14&=0xf8;seg15&=0xfe;seg11&=0xf0;seg12&=0xf0;
+			}		
+	 	}	
+		seg19|=0x40;
+		 if(Time_Stutas==0)
+		 {
+				seg20&=0xf9;seg20|=0x02;
+		 }
+		 else
+		 {
+				seg20&=0xf9;seg20|=0x04;
+		 }
+		seg15|=0x02;
+		
+		
+	write_addr_dat_n(20, seg11,1);
+	write_addr_dat_n(22, seg12,1);
+	write_addr_dat_n(24, seg13,1);
+	write_addr_dat_n(26, seg14,1);
+	write_addr_dat_n(28, seg15,1);
+	write_addr_dat_n(30, seg16,1);
+	write_addr_dat_n(32, seg17,1);
+	write_addr_dat_n(34, seg18,1);
+	write_addr_dat_n(36, seg19,1);
+	write_addr_dat_n(38, seg20,1);
+}
+//uint16_t half_sec;
+
+
+void LCD_Display(void)
+{
+	
+  LCD_Write_Speed_L1(L1_Speed,L3_Speed);
+	LCD_Write_Speed_L2(L2_Speed,L4_Speed);
+	LCD_rel(M1_Speed);
+	LCD_set(R1_Speed);
+	
+	
+}
